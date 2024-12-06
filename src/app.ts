@@ -116,7 +116,7 @@ const voiceNoteFlow = addKeyword<BaileysProvider, IDatabase>(EVENTS.VOICE_NOTE)
         }
     });
 
-};
+
 
 
 
