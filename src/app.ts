@@ -26,7 +26,7 @@ const userLocks = new Map(); // New lock mechanism
 /**
  * Function to process the user's message by sending it to the OpenAI API
  * and sending the response back to the user.
- */
+ 
 const processUserMessage = async (ctx, { flowDynamic, state, provider }) => {
     await typing(ctx, provider);
     console.log(ctx.body);
@@ -41,10 +41,10 @@ const processUserMessage = async (ctx, { flowDynamic, state, provider }) => {
     }
     //await flowDynamic([{ body: response }])
 };
-
+*/
 /**
  * Function to handle the queue for each user.
- */
+ 
 const handleQueue = async (userId) => {
     const queue = userQueues.get(userId);
     
@@ -67,19 +67,19 @@ const handleQueue = async (userId) => {
     userLocks.delete(userId); // Remove the lock once all messages are processed
     userQueues.delete(userId); // Remove the queue once all messages are processed
 };
-
+*/
 /**
  * Flujo de imágen y video
- */
+ 
 
 const mediaFlow = addKeyword(EVENTS.MEDIA).addAnswer('No puedo interpretar imagenes, videos ni documentos, intenta enviar un texto o un audio.')
-
+*/
 /**
  * Flujo de documentos
- */
+ 
 
 const documentFlow = addKeyword(EVENTS.DOCUMENT).addAnswer('No puedo interpretar imagenes, videos ni documentos, intenta enviar un texto o un audio.')
-
+*/
 
 
 /**
@@ -92,7 +92,7 @@ const voiceNoteFlow = addKeyword<BaileysProvider, IDatabase>(EVENTS.VOICE_NOTE)
         try {
             // Guardar archivo de audio localmente
             const to = ctx.from
-            await flowDynamic('\u{1F4A1} Audio')
+            await flowDynamic('\u{1F4A1} Escuchando audio')
             const localPath = await provider.saveFile(ctx, { path: './assets/'})
             //await flowDynamic(localPath)
             //console.log('Ruta del archivo de audio local:', localPath)
@@ -108,77 +108,19 @@ const voiceNoteFlow = addKeyword<BaileysProvider, IDatabase>(EVENTS.VOICE_NOTE)
             const transcription = transcribeResponse.text;
             console.log('Transcripción del audio:', transcription);
 
-            // Obtener respuesta del asistente de OpenAI basado en la transcripción
-            
-            const askToAiResponse = await toAsk(ASSISTANT_ID, transcription, state);
-            console.log('Respuesta del asistente de OpenAI:', askToAiResponse);
             await flowDynamic('Transcripción del audio: ' + transcription);
-            await flowDynamic(askToAiResponse);
-
-
-            // Convertir la respuesta en un archivo de audio
-            const audioUrl = await noteToVoiceFlow(askToAiResponse);
-            //console.log('Archivo de audio generado:', audioUrl);
-
-            // Devolver el audio como respuesta
-            await flowDynamic([{ media: audioUrl }]);
-            fs.unlinkSync(localPath);
-            fs.unlinkSync(audioUrl);
-
+            
         } catch (error) {
             console.error('Error al procesar la nota de voz:', error);
             await flowDynamic('Hubo un error al procesar la nota de voz. Por favor, intenta enviar un mensaje de texto.');
         }
     });
-// TEXTO A VOZ
-const noteToVoiceFlow = async (text: string) => {
-    const speechFilePath = path.resolve('./assets/speech_${Date.now()}.mp3');
-    try {
-        const mp3 = await openai.audio.speech.create({
-            model: "tts-1",
-            voice: "shimmer",
-            input: text,
-        });
 
-        const buffer = Buffer.from(await mp3.arrayBuffer());
-        await fs.promises.writeFile(speechFilePath, buffer);
-        return speechFilePath;
-    } catch (error) {
-        console.error('Error al generar el audio:', error);
-        throw new Error('Error al generar el audio');
-    }
 };
 
 
 
-/** Flujo de denuncia o reclamo
- * se activa ante estas palabras
- */
-const denunciaFlow = addKeyword<BaileysProvider, IDatabase>(['denuncia', 'reclamo', 'denunciar', 'reportar']).addAnswer(
-    ['Para reclamos o denuncias sobre servicios turísticos en Misiones ingrese a', '📄 https://misiones.tur.ar/web/pub_fisca/DenunciaAV.php \n', 'Dirección de Fiscalización del Ministerio de Turismo de Misiones: fiscalizacion@misiones.tur.ar']
-)
 
-/**
- * Flujo de bienvenida que maneja las respuestas del asistente de IA
- * @type {import('@builderbot/bot').Flow<BaileysProvider, MemoryDB>}
- */
-const welcomeFlow = addKeyword<BaileysProvider, IDatabase>(EVENTS.WELCOME)
-    .addAction(async (ctx, { flowDynamic, state, provider }) => {
-        const userId = ctx.from; // Use the user's ID to create a unique queue for each user
-        console.log(userId);
-        
-        if (!userQueues.has(userId)) {
-            userQueues.set(userId, []);
-        }
-
-        const queue = userQueues.get(userId);
-        queue.push({ ctx, flowDynamic, state, provider });
-
-        // If this is the only message in the queue, process it immediately
-        if (!userLocks.get(userId) && queue.length === 1) {
-            await handleQueue(userId);
-        }
-    });
 
 /**
  * Función principal que configura y inicia el bot
@@ -190,7 +132,7 @@ const main = async () => {
      * Flujo del bot
      * @type {import('@builderbot/bot').Flow<BaileysProvider, MemoryDB>}
      */
-    const adapterFlow = createFlow([welcomeFlow, voiceNoteFlow, mediaFlow, documentFlow, denunciaFlow]);
+    const adapterFlow = createFlow([voiceNoteFlow]);
 
     /**
      * Proveedor de servicios de mensajería
