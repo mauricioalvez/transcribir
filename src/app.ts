@@ -108,7 +108,7 @@ const voiceNoteFlow = addKeyword<BaileysProvider, IDatabase>(EVENTS.VOICE_NOTE)
             const transcription = transcribeResponse.text;
             console.log('Transcripción del audio:', transcription);
 
-            await flowDynamic('Transcripción del audio: ' + transcription);
+            await flowDynamic('Transcripción automática del audio: ' + transcription);
             
         } catch (error) {
             console.error('Error al procesar la nota de voz:', error);
